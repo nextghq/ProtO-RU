@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ocudu/support/virtual_clock.h"
 #include "ofh_timing_metrics_collector_impl.h"
 #include "ocudu/adt/span.h"
 #include "ocudu/ocudulog/logger.h"
@@ -60,7 +61,8 @@ class realtime_timing_worker : public operation_controller, public ota_symbol_bo
     static time_point now()
     {
       ::timespec ts;
-      ::clock_gettime(CLOCK_REALTIME, &ts);
+      // The host real time, or the sample clock of a channel emulator when OCUDU_VIRTUAL_CLOCK names one.
+      ts = ocudu::realtime_clock_now();
 
       time_point now(std::chrono::seconds(ts.tv_sec) + std::chrono::nanoseconds(ts.tv_nsec));
 

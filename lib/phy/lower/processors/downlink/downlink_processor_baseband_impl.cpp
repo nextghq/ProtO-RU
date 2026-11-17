@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause-Open-MPI
 // Portions of this file may implement 3GPP specifications, which may be subject to additional licensing requirements.
 
+#include "ocudu/support/virtual_clock.h"
 #include "downlink_processor_baseband_impl.h"
 #include "ocudu/gateways/baseband/buffer/baseband_gateway_buffer_writer_view.h"
 #include "ocudu/instrumentation/traces/ru_traces.h"
@@ -132,7 +133,7 @@ downlink_processor_baseband_impl::process(baseband_gateway_timestamp timestamp)
     trace_point tp = ru_tracer.now();
     notifier->on_tti_boundary(
         lower_phy_timing_context{.slot       = slot + nof_slot_tti_in_advance,
-                                 .time_point = std::chrono::system_clock::now() + nof_slot_tti_in_advance_ns});
+                                 .time_point = ocudu::system_clock_now() + nof_slot_tti_in_advance_ns});
     previous_slot = slot;
     ru_tracer << trace_event("on_tti_boundary", tp);
 

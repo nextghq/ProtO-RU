@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include "ocudu/support/virtual_clock.h"
 #include "ocudu/ran/slot_point.h"
 #include "ocudu/ran/subcarrier_spacing.h"
 #include <chrono>
@@ -32,7 +33,8 @@ struct gps_clock {
   static time_point now()
   {
     ::timespec ts = {};
-    ::clock_gettime(CLOCK_REALTIME, &ts);
+    // The host real time, or the sample clock of a channel emulator when OCUDU_VIRTUAL_CLOCK names one.
+    ts = ocudu::realtime_clock_now();
 
     time_point current(std::chrono::seconds(ts.tv_sec) + std::chrono::nanoseconds(ts.tv_nsec));
 
