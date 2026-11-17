@@ -18,8 +18,13 @@ using namespace ocudu;
 
 namespace {
 
-/// Number of grids held by the downlink reception pool.
-constexpr unsigned NOF_DL_POOL_GRIDS = 16;
+/// \brief Number of grids held by the downlink reception pool.
+///
+/// A grid is held from the first Control-Plane message of its slot (up to the T2a maximum ahead of the air time) until
+/// the radio has transmitted it (the lower PHY's transmit lead and processing delay after the reception window closes).
+/// Wide delay profiles, such as a twin's on a stepped virtual clock with windows of several slots, keep more than 16
+/// slots in flight at 30 kHz.
+constexpr unsigned NOF_DL_POOL_GRIDS = 64;
 
 } // namespace
 

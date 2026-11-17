@@ -50,6 +50,10 @@ void ru_cplane_scheduling_handler::handle_downlink_scheduling(unsigned          
   context.slot   = slot;
   context.sector = sector_id;
   grid_repo->add(context, grid, symbol_range, logger);
+  // Register the context now rather than at the next timing tick: the O-DU may send the slot's User-Plane right
+  // behind this message, before the timing worker runs again (always so when time advances in steps, as with a
+  // channel emulator's virtual clock), and User-Plane for a symbol without a registered context is dropped.
+  grid_repo->process_pending_contexts();
 }
 
 void ru_cplane_scheduling_handler::handle_uplink_scheduling(unsigned                              eaxc,
