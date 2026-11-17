@@ -188,7 +188,13 @@ void ru_emulator_timing_notifier::poll()
   slot_point        current_slot(to_numerology_value(scs), slot_count);
   slot_symbol_point symbol_point(current_slot, current_symbol_index % nof_symbols_per_slot, nof_symbols_per_slot);
 
-  notify_slot_symbol_point(symbol_point);
+  // Notify the skipped symbols too, oldest first, as the O-DU's realtime timing worker does: the downlink reception
+  // window closes each symbol on its notification, and a symbol that is never closed keeps its resource grid out of
+  // the pool. Late wake-ups are rare in real time, but a channel emulator's virtual clock advances a block of samples
+  // at a time and skips symbols on almost every step.
+  for (unsigned i = 0; i != delta; ++i) {
+    notify_slot_symbol_point(symbol_point - static_cast<int>(delta - 1 - i));
+  }
 }
 
 void ru_emulator_timing_notifier::notify_slot_symbol_point(slot_symbol_point slot)
