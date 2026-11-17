@@ -2,6 +2,7 @@
 // SPDX-License-Identifier: BSD-3-Clause-Open-MPI
 
 #include "ocudu/ofh/ethernet/dpdk/dpdk_ethernet_port_context.h"
+#include <cerrno>
 #include <charconv>
 #include <optional>
 #include <rte_ethdev.h>
@@ -45,7 +46,15 @@ static bool port_init(const dpdk_port_config& config, ::rte_mempool* mem_pool, u
   }
 
   // Configure MTU size.
-  if (::rte_eth_dev_set_mtu(port_id, config.mtu_size.value()) != 0) {
+  const int mtu_ret = ::rte_eth_dev_set_mtu(port_id, config.mtu_size.value());
+  if (mtu_ret == -ENOTSUP) {
+    // Some PMDs (e.g., net_memif) do not support configuring the MTU size and do not limit the size of the frames.
+    fmt::print("DPDK - Port does not support configuring the MTU size, the MTU size of '{}' bytes is not enforced. For "
+               "net_memif ports, set the 'bsize' device argument to '{}' bytes to receive each frame in a single "
+               "buffer\n",
+               config.mtu_size,
+               MAX_BUFFER_SIZE);
+  } else if (mtu_ret != 0) {
     uint16_t current_mtu;
     ::rte_eth_dev_get_mtu(port_id, &current_mtu);
     fmt::print("DPDK - Unable to configure MTU size to '{}' bytes, current MTU size is '{}' bytes\n",
