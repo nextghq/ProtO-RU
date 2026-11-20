@@ -29,6 +29,12 @@ struct lower_phy_baseband_processor_configuration {
   unsigned nof_rx_ports;
   /// Receive to transmit delay in samples.
   baseband_gateway_timestamp tx_time_offset;
+  /// \brief Advance of the lower PHY's frame timeline over the radio timeline, in samples.
+  ///
+  /// A radio sample at time \f$t\f$ belongs to the lower PHY time \f$t + a\f$. With \f$a\f$ equal to the receive
+  /// to transmit delay, the downlink frames fall on the radio timeline (see \ref
+  /// lower_phy_configuration::dl_frame_on_radio_timeline).
+  baseband_gateway_timestamp frame_timeline_advance = 0;
   /// Maximum number of samples between the last received sample and the next sample to transmit time instants.
   baseband_gateway_timestamp rx_to_tx_max_delay;
   /// Receive buffers size.
@@ -174,6 +180,7 @@ private:
   {
     // Add the time of all the hyper frames to avoid overflow and keep the SLOT.indication continuous in hyper-SFN
     // number.
+    timestamp += frame_timeline_advance;
     if (timestamp < start_time_sfn0) {
       timestamp += divide_ceil(start_time_sfn0, nof_samples_in_all_hyper_frames) * nof_samples_in_all_hyper_frames;
     }
@@ -195,6 +202,7 @@ private:
   downlink_processor_baseband&                                               downlink_processor;
   blocking_queue<std::unique_ptr<baseband_gateway_buffer_dynamic>>           rx_buffers;
   baseband_gateway_timestamp                                                 tx_time_offset;
+  baseband_gateway_timestamp                                                 frame_timeline_advance;
   baseband_gateway_timestamp                                                 rx_to_tx_max_delay;
   baseband_gateway_timestamp                                                 start_time_sfn0;
   internal_fsm                                                               tx_state;

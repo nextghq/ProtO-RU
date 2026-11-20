@@ -229,7 +229,7 @@ static std::ostream& operator<<(std::ostream& os, const lower_phy_rx_symbol_cont
 
 namespace {
 
-using LowerPhyParams = std::tuple<subcarrier_spacing, cyclic_prefix, sampling_rate, n_ta_offset, unsigned>;
+using LowerPhyParams = std::tuple<subcarrier_spacing, cyclic_prefix, sampling_rate, n_ta_offset, unsigned, bool>;
 
 class LowerPhyFixture : public testing::TestWithParam<LowerPhyParams>
 {
@@ -257,6 +257,7 @@ protected:
     ta_offset                    = std::get<3>(params);
     time_alignment_calibration   = time_alignment_calibration_dist(rgen);
     bandwidth_rb                 = std::get<4>(params);
+    dl_frame_on_radio_timeline   = std::get<5>(params);
     dl_freq_hz                   = dl_freq_hz_dist(rgen);
     ul_freq_hz                   = ul_freq_hz_dist(rgen);
     nof_tx_ports                 = nof_tx_ports_dist(rgen);
@@ -280,6 +281,7 @@ protected:
     config.srate                             = srate;
     config.ta_offset                         = ta_offset;
     config.time_alignment_calibration        = time_alignment_calibration;
+    config.dl_frame_on_radio_timeline        = dl_frame_on_radio_timeline;
     config.baseband_rx_buffer_size_policy    = lower_phy_baseband_buffer_size_policy::slot;
     config.amplitude_config                  = {};
     config.system_time_throttling            = 0.1;
@@ -362,6 +364,16 @@ protected:
     ASSERT_FALSE(ul_task_executor.has_pending_tasks());
   }
 
+  /// Advance of the lower PHY's frame timeline over the radio timeline: the N_TA offset when the downlink frame is on
+  /// the radio timeline, otherwise zero.
+  unsigned get_frame_timeline_advance() const
+  {
+    if (!dl_frame_on_radio_timeline) {
+      return 0;
+    }
+    return phy_time_unit::from_units_of_Tc(static_cast<unsigned>(ta_offset)).to_samples(srate.to_Hz());
+  }
+
   unsigned get_tx_time_offset() const
   {
     // Calculate the time alignment offset.
@@ -377,6 +389,7 @@ protected:
   unsigned           max_processing_delay_slots;
   sampling_rate      srate;
   n_ta_offset        ta_offset;
+  bool               dl_frame_on_radio_timeline = false;
   int                time_alignment_calibration;
   unsigned           bandwidth_rb;
   double             dl_freq_hz;
@@ -802,7 +815,8 @@ TEST_P(LowerPhyFixture, BasebandDownlinkFlow)
     ASSERT_EQ(transmit_entry.metadata.ts, current_timestamp + srate.to_kHz() + 2 * get_tx_time_offset());
 
     // Calculate expected timestamp and advance.
-    baseband_gateway_timestamp expected__timestamp = current_timestamp + srate.to_kHz() + get_tx_time_offset();
+    baseband_gateway_timestamp expected__timestamp =
+        current_timestamp + srate.to_kHz() + get_tx_time_offset() + get_frame_timeline_advance();
     current_timestamp += transmit_entry.data.get_nof_samples();
 
     // Handle the first slot.
@@ -873,7 +887,7 @@ TEST_P(LowerPhyFixture, BasebandUplinkFlow)
 
     // Assert received signal is the same as processed in UL.
     ASSERT_EQ(ul_bb_entry.buffer, receive_entry.data);
-    ASSERT_EQ(ul_bb_entry.timestamp, receive_entry.metadata.ts);
+    ASSERT_EQ(ul_bb_entry.timestamp, receive_entry.metadata.ts + get_frame_timeline_advance());
   }
 
   // No task should be pending in UL executor.
@@ -888,6 +902,7 @@ INSTANTIATE_TEST_SUITE_P(LowerPhy,
                                           testing::Values(sampling_rate::from_MHz(23.04),
                                                           sampling_rate::from_MHz(30.72)),
                                           testing::Values(n_ta_offset::n25600, n_ta_offset::n39936),
-                                          testing::Values(25, 52, 106)));
+                                          testing::Values(25, 52, 106),
+                                          testing::Bool()));
 
 } // namespace

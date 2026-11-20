@@ -25,6 +25,7 @@ lower_phy_baseband_processor::lower_phy_baseband_processor(const lower_phy_baseb
   downlink_processor(deps.dl_bb_proc),
   rx_buffers(config.nof_rx_buffers),
   tx_time_offset(config.tx_time_offset),
+  frame_timeline_advance(config.frame_timeline_advance),
   rx_to_tx_max_delay(config.rx_to_tx_max_delay),
   tx_state(config.stop_nof_slots),
   rx_state(config.stop_nof_slots)

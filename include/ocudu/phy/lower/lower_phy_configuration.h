@@ -64,8 +64,19 @@ struct lower_phy_configuration {
   unsigned max_processing_delay_slots;
   /// Sampling rate.
   sampling_rate srate;
-  /// Time alignment offset.
+  /// \brief Time alignment offset.
+  ///
+  /// The receive (uplink) frame starts this offset before the transmit (downlink) frame: N_TA,offset of TS 38.211
+  /// clause 4.3.1, with the values of TS 38.133 clause 7.1.2.
   n_ta_offset ta_offset;
+  /// \brief Places the downlink frame boundaries on the radio timeline.
+  ///
+  /// When false, the radio timeline marks the uplink frame boundaries and the downlink is transmitted \c ta_offset
+  /// later. When true, the radio timeline (and its PPS) marks the downlink frame boundaries at the antenna, the
+  /// reference that cell phase synchronisation aligns (TS 38.133 clause 7.4), and the uplink frame starts \c ta_offset
+  /// earlier. Both give the same timing between transmission and reception; they differ by \c ta_offset in absolute
+  /// time, which matters when radios with different offsets share one time reference.
+  bool dl_frame_on_radio_timeline = false;
   /// \brief Time alignment calibration in number of samples.
   ///
   /// Models the reception and transmission time misalignment inherent to the RF device. This time adjustment is

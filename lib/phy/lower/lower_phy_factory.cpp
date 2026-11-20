@@ -134,6 +134,11 @@ public:
         .nof_tx_ports           = config.nof_tx_ports,
         .nof_rx_ports           = config.nof_rx_ports,
         .tx_time_offset         = static_cast<baseband_gateway_timestamp>(tx_time_offset),
+        .frame_timeline_advance = config.dl_frame_on_radio_timeline
+                                      ? static_cast<baseband_gateway_timestamp>(
+                                            phy_time_unit::from_units_of_Tc(static_cast<unsigned>(config.ta_offset))
+                                                .to_samples(config.srate.to_Hz()))
+                                      : 0,
         .rx_to_tx_max_delay     = config.srate.to_kHz() + proc_bb_adaptor_config.tx_time_offset,
         .rx_buffer_size         = rx_buffer_size,
         .nof_rx_buffers         = std::max(4U, rx_to_tx_max_delay / rx_buffer_size),

@@ -118,6 +118,15 @@ static void configure_cli11_sdr_args(CLI::App& app, std::optional<ru_emulator_sd
   app.add_option("--time_alignment_calibration",
                  cfg.time_alignment_calibration,
                  "Rx-to-Tx time-alignment calibration in samples (overrides the RF driver default)");
+  app.add_option("--rx_ta_offset",
+                 cfg.rx_ta_offset,
+                 "Receive timing offset N_TA,offset of the receive carrier (TS 38.133 clause 7.1.2)")
+      ->capture_default_str()
+      ->check(CLI::IsMember({"band", "n0", "n25600", "n39936"}));
+  app.add_option("--dl_frame_on_reference",
+                 cfg.dl_frame_on_reference,
+                 "Transmit the downlink frame on the time reference and receive rx_ta_offset earlier, like an O-RU")
+      ->capture_default_str();
   app.add_option("--transmission_mode",
                  cfg.transmission_mode,
                  "Radio transmission mode "

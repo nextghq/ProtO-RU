@@ -155,6 +155,36 @@ TEST(ru_emulator_sdr_config_test, max_proc_delay_propagates_to_lower_phy)
   ASSERT_EQ(out.lower_phy_config.front().max_nof_prach_concurrent_requests, 6);
 }
 
+TEST(ru_emulator_sdr_config_test, receive_timing_defaults_to_the_band_offset_with_the_downlink_on_the_reference)
+{
+  ru_sdr_configuration out = generate_ru_emulator_sdr_config(make_sdr_config(),
+                                                             subcarrier_spacing::kHz30,
+                                                             bs_channel_bandwidth::MHz20,
+                                                             /*dl_arfcn=*/632628,
+                                                             /*band=*/std::nullopt,
+                                                             /*nof_tx_antennas=*/1,
+                                                             /*nof_rx_antennas=*/1);
+  ASSERT_EQ(out.lower_phy_config.front().ta_offset, n_ta_offset::n25600);
+  ASSERT_TRUE(out.lower_phy_config.front().dl_frame_on_radio_timeline);
+}
+
+TEST(ru_emulator_sdr_config_test, listener_receives_on_the_downlink_timing)
+{
+  ru_emulator_sdr_appconfig cfg = make_sdr_config();
+  cfg.rx_ta_offset              = "n0";
+  cfg.dl_frame_on_reference     = false;
+
+  ru_sdr_configuration out = generate_ru_emulator_sdr_config(cfg,
+                                                             subcarrier_spacing::kHz30,
+                                                             bs_channel_bandwidth::MHz20,
+                                                             /*dl_arfcn=*/632628,
+                                                             /*band=*/std::nullopt,
+                                                             /*nof_tx_antennas=*/1,
+                                                             /*nof_rx_antennas=*/1);
+  ASSERT_EQ(out.lower_phy_config.front().ta_offset, n_ta_offset::n0);
+  ASSERT_FALSE(out.lower_phy_config.front().dl_frame_on_radio_timeline);
+}
+
 TEST(ru_emulator_sdr_config_test, sfn0_start_time_is_anchored_only_on_real_radios)
 {
   // ZMQ has no radio clock: the start time stays unset (free-running).

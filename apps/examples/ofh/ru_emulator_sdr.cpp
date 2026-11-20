@@ -50,6 +50,21 @@ static std::vector<std::string> extract_zmq_ports(const std::string& driver_args
   return ports;
 }
 
+/// Converts the receive timing offset option into the N_TA,offset of TS 38.133 clause 7.1.2.
+static n_ta_offset get_rx_ta_offset(const std::string& rx_ta_offset, frequency_range fr)
+{
+  if (rx_ta_offset == "n0") {
+    return n_ta_offset::n0;
+  }
+  if (rx_ta_offset == "n25600") {
+    return n_ta_offset::n25600;
+  }
+  if (rx_ta_offset == "n39936") {
+    return n_ta_offset::n39936;
+  }
+  return band_helper::get_ta_offset(fr);
+}
+
 ru_sdr_configuration ocudu::generate_ru_emulator_sdr_config(const ru_emulator_sdr_appconfig& sdr_cfg,
                                                             subcarrier_spacing               scs,
                                                             bs_channel_bandwidth             bandwidth,
@@ -144,7 +159,8 @@ ru_sdr_configuration ocudu::generate_ru_emulator_sdr_config(const ru_emulator_sd
   low.dft_window_offset          = 0.5F;
   low.max_processing_delay_slots = sdr_cfg.max_proc_delay;
   low.srate                      = sampling_rate::from_MHz(sdr_cfg.srate_MHz);
-  low.ta_offset                  = band_helper::get_ta_offset(fr);
+  low.ta_offset                  = get_rx_ta_offset(sdr_cfg.rx_ta_offset, fr);
+  low.dl_frame_on_radio_timeline = sdr_cfg.dl_frame_on_reference;
   low.time_alignment_calibration = sdr_cfg.time_alignment_calibration.value_or(0);
   low.system_time_throttling     = 0.0F;
   // One extra slot for sample collection and one for processing delay.

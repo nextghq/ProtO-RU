@@ -48,6 +48,18 @@ struct ru_emulator_sdr_appconfig {
   double lo_offset_MHz = 0.0;
   /// Rx-to-Tx radio time-alignment calibration in samples (overrides the RF driver default when set).
   std::optional<int> time_alignment_calibration;
+  /// \brief Receive timing offset N_TA,offset (TS 38.211 clause 4.3.1, TS 38.133 clause 7.1.2) of this RU's receive
+  /// carrier: "band" (the band's default, 25600 Tc in FR1), "n0", "n25600" or "n39936".
+  ///
+  /// The receive frame starts this offset before the downlink frame. "n0" receives on the downlink timing, as a
+  /// listener that captures other RUs' downlink symbols needs; the RU's own UEs must then be told n0 as well.
+  std::string rx_ta_offset = "band";
+  /// \brief Transmits the downlink frame on the radio timeline (the time reference) and receives \c rx_ta_offset
+  /// earlier, like an O-RU whose air interface is synchronised to the reference.
+  ///
+  /// When false, the lower PHY's split-8 convention holds: the uplink frame is on the radio timeline and the downlink
+  /// goes out N_TA,offset later.
+  bool dl_frame_on_reference = true;
   /// Radio transmission mode ("continuous", "discontinuous", "same-port").
   std::string transmission_mode = "continuous";
   /// Transmit power ramping time in microseconds (discontinuous transmission).

@@ -54,6 +54,8 @@ static void fill_sdr_section(YAML::Node node, const ru_emulator_sdr_appconfig& c
   if (config.time_alignment_calibration) {
     node["time_alignment_calibration"] = *config.time_alignment_calibration;
   }
+  node["rx_ta_offset"]          = config.rx_ta_offset;
+  node["dl_frame_on_reference"] = config.dl_frame_on_reference;
   node["transmission_mode"] = config.transmission_mode;
   node["power_ramping"]     = config.power_ramping_us;
   node["gain_backoff"]      = config.gain_backoff_dB;
