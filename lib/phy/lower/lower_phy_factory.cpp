@@ -139,6 +139,7 @@ public:
                                             phy_time_unit::from_units_of_Tc(static_cast<unsigned>(config.ta_offset))
                                                 .to_samples(config.srate.to_Hz()))
                                       : 0,
+        .rx_window_delay        = config.rx_window_delay_samples,
         .rx_to_tx_max_delay     = config.srate.to_kHz() + proc_bb_adaptor_config.tx_time_offset,
         .rx_buffer_size         = rx_buffer_size,
         .nof_rx_buffers         = std::max(4U, rx_to_tx_max_delay / rx_buffer_size),

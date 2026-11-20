@@ -183,6 +183,25 @@ TEST(ru_emulator_sdr_config_test, listener_receives_on_the_downlink_timing)
                                                              /*nof_rx_antennas=*/1);
   ASSERT_EQ(out.lower_phy_config.front().ta_offset, n_ta_offset::n0);
   ASSERT_FALSE(out.lower_phy_config.front().dl_frame_on_radio_timeline);
+  ASSERT_EQ(out.lower_phy_config.front().rx_window_delay_samples, 0);
+}
+
+TEST(ru_emulator_sdr_config_test, receive_window_delay_rounds_to_samples)
+{
+  ru_emulator_sdr_appconfig cfg = make_sdr_config();
+  cfg.rx_ta_offset              = "n0";
+  // A 500 m baseline: 1667.8 ns, 38.4 samples at 23.04 Msps.
+  cfg.rx_window_delay_ns = 1667.8;
+  cfg.srate_MHz          = 23.04;
+
+  ru_sdr_configuration out = generate_ru_emulator_sdr_config(cfg,
+                                                             subcarrier_spacing::kHz30,
+                                                             bs_channel_bandwidth::MHz20,
+                                                             /*dl_arfcn=*/632628,
+                                                             /*band=*/std::nullopt,
+                                                             /*nof_tx_antennas=*/1,
+                                                             /*nof_rx_antennas=*/1);
+  ASSERT_EQ(out.lower_phy_config.front().rx_window_delay_samples, 38);
 }
 
 TEST(ru_emulator_sdr_config_test, sfn0_start_time_is_anchored_only_on_real_radios)

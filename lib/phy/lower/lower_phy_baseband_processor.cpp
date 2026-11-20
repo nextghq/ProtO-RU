@@ -26,6 +26,7 @@ lower_phy_baseband_processor::lower_phy_baseband_processor(const lower_phy_baseb
   rx_buffers(config.nof_rx_buffers),
   tx_time_offset(config.tx_time_offset),
   frame_timeline_advance(config.frame_timeline_advance),
+  rx_window_delay(config.rx_window_delay),
   rx_to_tx_max_delay(config.rx_to_tx_max_delay),
   tx_state(config.stop_nof_slots),
   rx_state(config.stop_nof_slots)
@@ -160,7 +161,9 @@ void lower_phy_baseband_processor::ul_process()
     trace_point ul_tp = ru_tracer.now();
 
     // Process UL.
-    uplink_processor.process(ul_buffer->get_reader(), apply_timestamp_sfn0_ref(rx_metadata.ts));
+    // Radio timestamps lie far above the delay (the radio starts streaming at its current time), so the
+    // subtraction does not wrap.
+    uplink_processor.process(ul_buffer->get_reader(), apply_timestamp_sfn0_ref(rx_metadata.ts) - rx_window_delay);
 
     // Return buffer to receive.
     rx_buffers.push_blocking(std::move(ul_buffer));

@@ -35,6 +35,9 @@ struct lower_phy_baseband_processor_configuration {
   /// to transmit delay, the downlink frames fall on the radio timeline (see \ref
   /// lower_phy_configuration::dl_frame_on_radio_timeline).
   baseband_gateway_timestamp frame_timeline_advance = 0;
+  /// Delay of the receive windows in samples: a received sample at radio time \f$t\f$ belongs to the lower PHY time
+  /// \f$t + a - d\f$ (see \ref lower_phy_configuration::rx_window_delay_samples).
+  baseband_gateway_timestamp rx_window_delay = 0;
   /// Maximum number of samples between the last received sample and the next sample to transmit time instants.
   baseband_gateway_timestamp rx_to_tx_max_delay;
   /// Receive buffers size.
@@ -203,6 +206,7 @@ private:
   blocking_queue<std::unique_ptr<baseband_gateway_buffer_dynamic>>           rx_buffers;
   baseband_gateway_timestamp                                                 tx_time_offset;
   baseband_gateway_timestamp                                                 frame_timeline_advance;
+  baseband_gateway_timestamp                                                 rx_window_delay;
   baseband_gateway_timestamp                                                 rx_to_tx_max_delay;
   baseband_gateway_timestamp                                                 start_time_sfn0;
   internal_fsm                                                               tx_state;

@@ -77,6 +77,12 @@ struct lower_phy_configuration {
   /// earlier. Both give the same timing between transmission and reception; they differ by \c ta_offset in absolute
   /// time, which matters when radios with different offsets share one time reference.
   bool dl_frame_on_radio_timeline = false;
+  /// \brief Delay of the receive (uplink) windows in samples, on top of \c ta_offset; the transmission is unchanged.
+  ///
+  /// A receiver capturing another radio's downlink sets its windows on the expected arrival: for a direct path of
+  /// propagation delay \f$d\f$, the windows start \f$d\f$ after the downlink timing, so that every echo, delayed
+  /// further, lies within the cyclic prefix rather than straddling it.
+  unsigned rx_window_delay_samples = 0;
   /// \brief Time alignment calibration in number of samples.
   ///
   /// Models the reception and transmission time misalignment inherent to the RF device. This time adjustment is

@@ -161,6 +161,7 @@ ru_sdr_configuration ocudu::generate_ru_emulator_sdr_config(const ru_emulator_sd
   low.srate                      = sampling_rate::from_MHz(sdr_cfg.srate_MHz);
   low.ta_offset                  = get_rx_ta_offset(sdr_cfg.rx_ta_offset, fr);
   low.dl_frame_on_radio_timeline = sdr_cfg.dl_frame_on_reference;
+  low.rx_window_delay_samples    = static_cast<unsigned>(std::lround(sdr_cfg.rx_window_delay_ns * 1e-9 * sdr_cfg.srate_MHz * 1e6));
   low.time_alignment_calibration = sdr_cfg.time_alignment_calibration.value_or(0);
   low.system_time_throttling     = 0.0F;
   // One extra slot for sample collection and one for processing delay.

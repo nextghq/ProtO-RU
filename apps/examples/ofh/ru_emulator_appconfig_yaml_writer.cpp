@@ -56,6 +56,7 @@ static void fill_sdr_section(YAML::Node node, const ru_emulator_sdr_appconfig& c
   }
   node["rx_ta_offset"]          = config.rx_ta_offset;
   node["dl_frame_on_reference"] = config.dl_frame_on_reference;
+  node["rx_window_delay_ns"]    = config.rx_window_delay_ns;
   node["transmission_mode"] = config.transmission_mode;
   node["power_ramping"]     = config.power_ramping_us;
   node["gain_backoff"]      = config.gain_backoff_dB;

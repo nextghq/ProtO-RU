@@ -127,6 +127,11 @@ static void configure_cli11_sdr_args(CLI::App& app, std::optional<ru_emulator_sd
                  cfg.dl_frame_on_reference,
                  "Transmit the downlink frame on the time reference and receive rx_ta_offset earlier, like an O-RU")
       ->capture_default_str();
+  app.add_option("--rx_window_delay_ns",
+                 cfg.rx_window_delay_ns,
+                 "Delay of the receive windows in ns on top of rx_ta_offset (a listener: its direct path's delay)")
+      ->capture_default_str()
+      ->check(CLI::Range(0.0, 100000.0));
   app.add_option("--transmission_mode",
                  cfg.transmission_mode,
                  "Radio transmission mode "

@@ -60,6 +60,9 @@ struct ru_emulator_sdr_appconfig {
   /// When false, the lower PHY's split-8 convention holds: the uplink frame is on the radio timeline and the downlink
   /// goes out N_TA,offset later.
   bool dl_frame_on_reference = true;
+  /// Delay of the receive windows in nanoseconds, on top of \c rx_ta_offset (rounded to samples): a listener sets
+  /// it to the direct path's propagation delay, baseline over c, so its windows sit on the illuminator's arrival.
+  double rx_window_delay_ns = 0.0;
   /// Radio transmission mode ("continuous", "discontinuous", "same-port").
   std::string transmission_mode = "continuous";
   /// Transmit power ramping time in microseconds (discontinuous transmission).

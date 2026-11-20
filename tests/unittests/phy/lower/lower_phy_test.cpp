@@ -258,6 +258,7 @@ protected:
     time_alignment_calibration   = time_alignment_calibration_dist(rgen);
     bandwidth_rb                 = std::get<4>(params);
     dl_frame_on_radio_timeline   = std::get<5>(params);
+    rx_window_delay              = dl_frame_on_radio_timeline ? 38 : 0;
     dl_freq_hz                   = dl_freq_hz_dist(rgen);
     ul_freq_hz                   = ul_freq_hz_dist(rgen);
     nof_tx_ports                 = nof_tx_ports_dist(rgen);
@@ -282,6 +283,7 @@ protected:
     config.ta_offset                         = ta_offset;
     config.time_alignment_calibration        = time_alignment_calibration;
     config.dl_frame_on_radio_timeline        = dl_frame_on_radio_timeline;
+    config.rx_window_delay_samples           = rx_window_delay;
     config.baseband_rx_buffer_size_policy    = lower_phy_baseband_buffer_size_policy::slot;
     config.amplitude_config                  = {};
     config.system_time_throttling            = 0.1;
@@ -390,6 +392,8 @@ protected:
   sampling_rate      srate;
   n_ta_offset        ta_offset;
   bool               dl_frame_on_radio_timeline = false;
+  /// Receive window delay: a listener's, on the downlink timing case only (it does not touch the transmission).
+  unsigned rx_window_delay = 0;
   int                time_alignment_calibration;
   unsigned           bandwidth_rb;
   double             dl_freq_hz;
@@ -887,7 +891,7 @@ TEST_P(LowerPhyFixture, BasebandUplinkFlow)
 
     // Assert received signal is the same as processed in UL.
     ASSERT_EQ(ul_bb_entry.buffer, receive_entry.data);
-    ASSERT_EQ(ul_bb_entry.timestamp, receive_entry.metadata.ts + get_frame_timeline_advance());
+    ASSERT_EQ(ul_bb_entry.timestamp, receive_entry.metadata.ts + get_frame_timeline_advance() - rx_window_delay);
   }
 
   // No task should be pending in UL executor.
